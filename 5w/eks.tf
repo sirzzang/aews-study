@@ -239,7 +239,21 @@ module "eks" {
       desired_size           = var.gpu_desired_size
       max_size               = var.gpu_max_size
       min_size               = 0
-      disk_size              = var.gpu_node_disk_size
+
+      # disk_size 는 v21 custom LT 경로에서 무시된다. C-1 발견:
+      # LaunchTemplate.BlockDeviceMappings=null 로 렌더되어 AMI 기본(AL2023 NVIDIA = 20GB)으로 고정.
+      # vLLM(C-6) 모델 수용을 위해 block_device_mappings 로 LT 에 직접 주입.
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = var.gpu_node_disk_size
+            volume_type           = "gp3"
+            delete_on_termination = true
+          }
+        }
+      }
+
       # 단일 AZ 고정을 실제로 적용하는 키. submodule 변수명이 subnet_ids 이므로 이 이름이 맞다.
       # 이전 `subnets = local.gpu_subnet_ids` 는 E-3 apply 에서 조용히 무시되어
       # GPU NG 가 3개 private subnet(multi-AZ) 로 붙었었다. 속성명 교정 후 단일 AZ 복원.

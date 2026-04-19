@@ -122,13 +122,21 @@ variable "gpu_az_index" {
 }
 
 ########################
-# GPU Operator (helm) — 기본 비활성
+# GPU Operator (helm) — 기본 활성
 ########################
 
+# default=true 인 이유: 이 프로젝트의 "일상 상태" 는 GPU Operator 가 설치되어 있는 운영 중 구성.
+# 매 plan/apply 마다 CLI 로 -var 를 빠뜨리면 state 의 helm_release 가 destroy 대상으로 잡히는 구조를 방지.
+# (2026-04-19 C-1 세션 발견. 상세 results/C-1-gpu-operator/findings.md)
+#
+# 최초 배포 시(E-2/E-3 단계, 아직 operator 설치 전)에는 반드시 다음과 같이 명시:
+#   terraform plan  -var enable_gpu_operator=false -out=...
+#   terraform apply ...
+# GPU Operator 설치 단계(E-4) 부터는 -var 플래그 없이 default(true) 사용.
 variable "enable_gpu_operator" {
-  description = "true로 두면 NVIDIA GPU Operator helm_release를 생성. 첫 E-2 세션에서는 false 유지."
+  description = "NVIDIA GPU Operator helm_release 생성 여부. 기본 true(운영 상태). 최초 클러스터 부트스트랩 시(E-2/E-3)에만 -var enable_gpu_operator=false 로 명시적 override."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "gpu_operator_namespace" {
