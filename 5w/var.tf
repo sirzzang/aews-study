@@ -74,9 +74,11 @@ variable "WorkerNodeVolumesize" {
 # GPU node group (5주차 추가)
 ########################
 
-# 비용 가드: 실습 시작 시 2, 종료 시 0. apply 명령으로 제어.
-#   terraform apply -var gpu_desired_size=2
-#   terraform apply -var gpu_desired_size=0
+# 비용 가드: NG 최초 생성 시 초기값을 결정한다.
+# 이미 존재하는 NG의 스케일링은 lifecycle.ignore_changes로 인해
+# TF 경로로 반영되지 않으므로 AWS CLI로 수행한다.
+#   aws eks update-nodegroup-config --scaling-config desiredSize=2
+#   aws eks update-nodegroup-config --scaling-config desiredSize=0
 variable "gpu_desired_size" {
   description = "GPU 노드 그룹 desired_size. 비용 가드를 위해 기본 0."
   type        = number
