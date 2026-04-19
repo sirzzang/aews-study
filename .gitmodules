@@ -1,0 +1,3 @@
+[submodule "6w/eks-saas-gitops"]
+	path = 6w/eks-saas-gitops
+	url = https://github.com/ianychoi/eks-saas-gitops.git
